@@ -38,36 +38,40 @@ Integrations][1] documentation.
 
 ### In Jira
 
-#### Configure an User for API Access
+#### Configure a User for API Access
 
-**Option 1 - Create a New User**
+It is recommended that you create an Atlassian user for exclusive use by
+JupiterOne (a "service account" user). This user will be limited to the
+permissions required for the integration to function.
 
-1. Create a new service account for JupiterOne use or use an existing account.
-1. Login to Jira and navigate to *User Management*.
-1. Send an invite to the service account.
+!!! note
+    
+    The Jira Free plan treats all users as an admin. You may simply use
+    your user to create an API token.
 
-**Option 2 - Leverage an Existing User**
+1. Create a new email address in your organization's domain, such as
+   `jupiterone+jira@yourdomain.com`.
+1. Log into [Atlassian Admin][aadmin] and navigate to *Manage Users* for the
+   Organization owning the target Jira account.
+1. Click *Invite users* to invite the service account.
+   - Role: Basic
+   - Product access: Jira Software
+   - Group membership: `jira-software-users`
 
-Before you use an existing user, you should verify a couple of things.
-
-- Make sure the appropriate permissions are configured/can be added to the
-   account (see the *Permissions* section below).
-- Make sure you have the ability to login to the user's Jira account.
-
-#### Permissions
+##### Permissions
 
 - Authorize the user to read groups and users by granting the ["Browse Users"
-   global permission][5]. This allows JupiterOne to provide visibility into Jira
-   access.
+  global permission][5]. This allows JupiterOne to provide visibility into Jira
+  access.
 - Authorize browse access to projects configured in JupiterOne. Use [group,
-   project, role, and issue security features of Jira][3] to manage the user's
-   access. Note that restricting to read-only access will require explicit
-   removal of write permissions. Please see the Jira article on [How to Create a
-   Read Only User][4].
+  project, role, and issue security features of Jira][3] to manage the user's
+  access. Note that restricting to read-only access will require explicit
+  removal of write permissions. Please see the Jira article on [How to Create a
+  Read Only User][4].
 - Authorize "Create Issues" permissions in projects that serve as JupiterOne
    Alert Rule action targets.
 
-#### Create an API Token
+##### Create an API Token
 
 1. Log in to Jira as the JupiterOne user and follow the Jira guide to [create an API token][2].
 
@@ -137,6 +141,7 @@ The following relationships are created/mapped:
   https://confluence.atlassian.com/jirakb/jira-cloud-how-to-create-a-read-only-user-779160729.html
 [5]:
   https://confluence.atlassian.com/adminjiraserver/managing-global-permissions-938847142.html
+[aadmin]: https://admin.atlassian.com
 
 ## Pro Tips
 
