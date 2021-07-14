@@ -5,3 +5,6 @@ dist/
 yarn-error.log
 .env
 docker-compose.yml
+.j1-integration/
+.eslintcache
+tsconfig.tsbuildinfo

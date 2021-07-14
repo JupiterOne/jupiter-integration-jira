@@ -1,11 +1,10 @@
-import { createTestLogger } from "@jupiterone/jupiter-managed-integration-sdk";
+import { createMockIntegrationLogger } from "@jupiterone/integration-sdk-testing";
 import { createIssueEntity } from ".";
-import { buildCustomFields } from "../initializeContext";
+import { buildCustomFields } from "../utils/builders";
 import { Issue } from "../jira";
 import generateEntityKey from "../utils/generateEntityKey";
-import getTime from "../utils/getTime";
-
 import merge from "lodash.merge";
+import { parseTimePropertyValue } from "@jupiterone/integration-sdk-core";
 
 function getJiraIssue(overrides: object = {}): Issue {
   return merge<Issue, any>(
@@ -340,10 +339,10 @@ describe("createIssueEntity", () => {
       reporter: "adamz@company.com",
       assignee: undefined,
       creator: "adamz@company.com",
-      createdOn: getTime(jiraIssue.fields.created),
-      updatedOn: getTime(jiraIssue.fields.updated),
-      resolvedOn: getTime(jiraIssue.fields.resolutiondate),
-      dueOn: getTime(jiraIssue.fields.duedate),
+      createdOn: parseTimePropertyValue(jiraIssue.fields.created),
+      updatedOn: parseTimePropertyValue(jiraIssue.fields.updated),
+      resolvedOn: parseTimePropertyValue(jiraIssue.fields.resolutiondate),
+      dueOn: parseTimePropertyValue(jiraIssue.fields.duedate),
       resolution: undefined,
       labels: [],
       components: [],
@@ -352,7 +351,7 @@ describe("createIssueEntity", () => {
     expect(
       createIssueEntity({
         issue: jiraIssue as any,
-        logger: createTestLogger(),
+        logger: createMockIntegrationLogger(),
         fieldsById: fieldsById as any,
         customFieldsToInclude,
       }),
@@ -367,7 +366,7 @@ describe("createIssueEntity", () => {
     expect(
       createIssueEntity({
         issue: jiraIssue,
-        logger: createTestLogger(),
+        logger: createMockIntegrationLogger(),
       })._class,
     ).toEqual(["Finding", "Record"]);
   });
@@ -377,7 +376,7 @@ describe("createIssueEntity", () => {
     expect(
       createIssueEntity({
         issue: jiraIssue,
-        logger: createTestLogger(),
+        logger: createMockIntegrationLogger(),
         requestedClass: "SomeClass",
       })._class,
     ).toEqual(["Record", "SomeClass"]);

@@ -49,6 +49,8 @@ function parseContentBlock(content: TextContent): string {
         const code = content.content.map(c => c.text).join("\n");
         const lang = content.attrs ? content.attrs.language : "";
         return `\`\`\`${lang}\n${code}\n\`\`\``;
+      } else {
+        return "";
       }
     }
     case "text": {

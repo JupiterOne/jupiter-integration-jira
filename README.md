@@ -1,150 +1,52 @@
-# JupiterOne Managed Integration for Jira
+# JupiterOne Integration
 
-[![Build Status](https://github.com/JupiterOne/graph-jira/workflows/Build/badge.svg)](https://github.com/JupiterOne/graph-jira/actions?query=workflow%3ABuild)
-[![Gitleaks Status](https://github.com/JupiterOne/graph-jira/workflows/gitleaks/badge.svg)](https://github.com/JupiterOne/graph-jira/actions?query=workflow%3Agitleaks)
-[![Greenkeeper badge](https://badges.greenkeeper.io/JupiterOne/graph-jira.svg)](https://greenkeeper.io/)
+Learn about the data ingested, benefits of this integration, and how to use it
+with JupiterOne in the [integration documentation](docs/jupiterone.md).
 
-A JupiterOne integration ingests information such as configurations and other
-metadata about digital and physical assets belonging to an organization. The
-integration is responsible for connecting to data provider APIs and determining
-changes to make to the JupiterOne graph database to reflect the current state of
-assets. Managed integrations execute within the JupiterOne infrastructure and
-are deployed by the JupiterOne engineering team.
+## Development
 
-## Integration Instance Configuration
+### Prerequisites
 
-JupiterOne accounts may configure a number of instances of an integration, each
-containing credentials and other information necessary for the integration to
-connect to provider APIs. An integration is triggered by an event containing the
-instance configuration. `IntegrationInstance.config` is encrypted at rest and
-decrypted before it is delivered to the integration execution handler.
+1. Install [Node.js](https://nodejs.org/) using the
+   [installer](https://nodejs.org/en/download/) or a version manager such as
+   [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm).
+2. Install [`yarn`](https://yarnpkg.com/getting-started/install) or
+   [`npm`](https://github.com/npm/cli#installation) to install dependencies.
+3. Install dependencies with `yarn install`.
+4. Register an account in the system this integration targets for ingestion and
+   obtain API credentials.
+5. `cp .env.example .env` and add necessary values for runtime configuration.
 
-Currently, the integration instance configuration user interface will need code
-changes to collect necessary information.
+   When an integration executes, it needs API credentials and any other
+   configuration parameters necessary for fetching data from the provider. The
+   names of these parameters are defined in `src/instanceConfigFields.ts`. When
+   executed in a development environment, values for these parameters are read
+   from Node's `process.env`, loaded from `.env`. That file has been added to
+   `.gitignore` to avoid commiting credentials.
 
-Local execution of the integration is started through `execute.ts`
-(`yarn start`), which may be changed to load development credentials into the
-`IntegrationInstance.config`. Use environment variables to avoid publishing
-sensitive information to GitHub!
+### Running the integration
 
-## Documentation
+1. `yarn start` to collect data
+2. `yarn graph` to show a visualization of the collected data
+3. `yarn j1-integration -h` for additional commands
 
-Integration projects must provide documentation for docs.jupiterone.io. This
-documentation should outline the credentials required by the data provider API
-(including specific permissions if the data provider allows scoping of
-credentials), which entities are ingested, and what relationships are created.
-At build time, this documentation will be placed in a docs folder inside dist so
-that it's included in the NPM module.
+### Making Contributions
 
-The documentation should be placed in `docs/jupiterone-io` and named after the
-package. For example, an AWS integration with the name "graph-aws" in
-`package.json` should have its documentation in
-`docs/jupiterone-io/graph-aws.md`. Any other files in `docs/jupiterone-io` will
-not be published. Also note that namespace is ignored, so "graph-aws" and
-"@jupiterone/graph-aws" should both name their docs file the same.
+Start by taking a look at the source code. The integration is basically a set of
+functions called steps, each of which ingests a collection of resources and
+relationships. The goal is to limit each step to as few resource types as
+possible so that should the ingestion of one type of data fail, it does not
+necessarily prevent the ingestion of other, unrelated data. That should be
+enough information to allow you to get started coding!
 
-The first header in the documentation is used as the title of the document in
-the table of contents on docs.jupiterone.io, so it should be the name of the
-provider (E.G. "AWS").
+See the
+[SDK development documentation](https://github.com/JupiterOne/sdk/blob/master/docs/integrations/development.md)
+for a deep dive into the mechanics of how integrations work.
 
-The documentation is pushed to docs.jupiterone.io every time a new version of
-the integration is specified in `package.json`, so make sure it's up to date
-every time you release a new version.
+See [docs/development.md](docs/development.md) for any additional details about
+developing this integration.
 
-## Development Environment
+### Changelog
 
-Integrations mutate the graph to reflect configurations and metadata from the
-provider. Developing an integration involves:
-
-1.  Establishing a secure connection to a provider API
-1.  Fetching provider data and converting it to entities and relationships
-1.  Collecting the existing set of entities and relationships already in the
-    graph
-1.  Performing a diff to determine which entites/relationships to
-    create/update/delete
-1.  Delivering create/update/delete operations to the persister to update the
-    graph
-
-Run the integration to see what happens. You may use use Node to execute
-directly on your machine (NVM is recommended).
-
-1.  Install Docker
-1.  `yarn install`
-1.  `yarn start:graph`
-1.  `yarn start`
-
-Activity is logged to the console indicating the operations produced and
-processed. View raw data in the graph database using
-[Graphexp](https://github.com/bricaud/graphexp).
-
-Execute the integration again to see that there are no change operations
-produced.
-
-Restart the graph server to clear the data when you want to run the integration
-with no existing data.
-
-```sh
-yarn stop:graph && yarn start:graph
-```
-
-### Environment Variables
-
-Provider API configuration is specified by users when they install the
-integration into their JupiterOne environment. Some integrations may also
-require pre-shared secrets, used across all integration installations, which is
-to be secured by JupiterOne and provided in the execution context.
-
-Local execution requires the same configuration parameters for a development
-provider account. `tools/execute.ts` is the place to provide the parameters. The
-execution script must not include any credentials, and it is important to make
-it easy for other developers to execute the integration against their own
-development provider account.
-
-1. Update `tools/execute.ts` to provide the properties required by the
-   `executionHandler` function
-1. Create a `.env` file to provide the environment variables transferred into
-   the properties
-
-For example, given this execution script:
-
-```typescript
-const integrationConfig = {
-  apiToken: process.env.MYPROVIDER_LOCAL_EXECUTION_API_TOKEN,
-};
-
-const invocationArgs = {
-  preSharedPrivateKey: process.env.MYPROVIDER_LOCAL_EXECUTION_PRIVATE_KEY,
-};
-```
-
-Create a `.env` file (this is `.gitignore`'d):
-
-```sh
-MYPROVIDER_LOCAL_EXECUTION_API_TOKEN=abc123
-MYPROVIDER_LOCAL_EXECUTION_PRIVATE_KEY='something\nreally\nlong'
-```
-
-#### SDK Variables
-
-Environment variables can modify some aspects of the integration SDK behavior.
-These may be added to your `.env` with values to overrided the defaults listed
-here.
-
-- `GRAPH_DB_ENDPOINT` - `"localhost"`
-
-### Running tests
-
-All tests must be written using Jest. Focus on testing provider API interactions
-and conversion from provider data to entities and relationships.
-
-To run tests locally:
-
-```sh
-yarn test
-```
-
-### Deployment
-
-Managed integrations are deployed into the JupiterOne infrastructure by staff
-engineers using internal projects that declare a dependency on the open source
-integration NPM package. The package will be published by the JupiterOne team.
+The history of this integration's development can be viewed at
+[CHANGELOG.md](CHANGELOG.md).

@@ -17,7 +17,7 @@ describe("JiraClient fetch ok data", () => {
       : nock.back.setMode("record");
   });
 
-  async function getAuthenticatedClient() {
+  function getAuthenticatedClient() {
     const client = new JiraClient({
       host: JIRA_LOCAL_EXECUTION_HOST,
       username: process.env.JIRA_LOCAL_EXECUTION_USERNAME || "",
@@ -31,7 +31,7 @@ describe("JiraClient fetch ok data", () => {
     const { nockDone } = await nock.back("server-info-ok.json", {
       before: prepareScope,
     });
-    const client = await getAuthenticatedClient();
+    const client = getAuthenticatedClient();
     const response = await client.fetchServerInfo();
     expect(response).toContainKeys(["baseUrl", "serverTitle"]);
     nockDone();
@@ -41,7 +41,7 @@ describe("JiraClient fetch ok data", () => {
     const { nockDone } = await nock.back("projects-ok.json", {
       before: prepareScope,
     });
-    const client = await getAuthenticatedClient();
+    const client = getAuthenticatedClient();
     const response = await client.fetchProjects();
     expect(response).toBeArray();
     expect(response).not.toBeArrayOfSize(0);
@@ -56,7 +56,7 @@ describe("JiraClient fetch ok data", () => {
     const { nockDone } = await nock.back("users-ok.json", {
       before: prepareScope,
     });
-    const client = await getAuthenticatedClient();
+    const client = getAuthenticatedClient();
     const response = await client.fetchUsersPage();
     expect(response).toBeArray();
     expect(response).not.toBeArrayOfSize(0);
@@ -67,7 +67,7 @@ describe("JiraClient fetch ok data", () => {
     const { nockDone } = await nock.back("issues-ok.json", {
       before: prepareScope,
     });
-    const client = await getAuthenticatedClient();
+    const client = getAuthenticatedClient();
     const response = await client.fetchIssuesPage({ project: "First Project" });
     expect(response).toBeArray();
     expect(response).not.toBeArrayOfSize(0);
@@ -78,7 +78,7 @@ describe("JiraClient fetch ok data", () => {
     const { nockDone } = await nock.back("issues-updatedAt-ok.json", {
       before: prepareScope,
     });
-    const client = await getAuthenticatedClient();
+    const client = getAuthenticatedClient();
     const response = await client.fetchIssuesPage({
       project: "First Project",
       sinceAtTimestamp: Date.parse("2019-04-08T12:51:50.417Z"),
@@ -92,7 +92,7 @@ describe("JiraClient fetch ok data", () => {
     const { nockDone } = await nock.back("issues-not-existed-exception.json", {
       before: prepareScope,
     });
-    const client = await getAuthenticatedClient();
+    const client = getAuthenticatedClient();
     await expect(
       client.fetchIssuesPage({ project: "NotExistedProject" }),
     ).rejects.toThrow();
@@ -103,7 +103,7 @@ describe("JiraClient fetch ok data", () => {
     const { nockDone } = await nock.back("issues-empty-param-ok.json", {
       before: prepareScope,
     });
-    const client = await getAuthenticatedClient();
+    const client = getAuthenticatedClient();
     const issues = await client.fetchIssuesPage({ project: "" });
     expect(issues).toEqual([]);
     nockDone();
@@ -120,7 +120,7 @@ describe("JiraClient bad credentials", () => {
     nock.back.setMode("record");
   });
 
-  async function getAuthenticatedClient() {
+  function getAuthenticatedClient() {
     const client = new JiraClient({
       host: JIRA_LOCAL_EXECUTION_HOST,
       username: "fakeUser",
@@ -135,7 +135,7 @@ describe("JiraClient bad credentials", () => {
       before: prepareScope,
     });
 
-    const client = await getAuthenticatedClient();
+    const client = getAuthenticatedClient();
     await expect(client.fetchProjects()).rejects.toThrow();
 
     nockDone();
@@ -152,7 +152,7 @@ describe("JiraClient creating data", () => {
     nock.back.setMode("record");
   });
 
-  async function getAuthenticatedClient() {
+  function getAuthenticatedClient() {
     const client = new JiraClient({
       host: JIRA_LOCAL_EXECUTION_HOST,
       username: process.env.JIRA_LOCAL_EXECUTION_USERNAME || "",
@@ -163,7 +163,7 @@ describe("JiraClient creating data", () => {
   }
 
   test("create issue with existing project ok", async () => {
-    const client = await getAuthenticatedClient();
+    const client = getAuthenticatedClient();
     const { nockDone: creatingDone } = await nock.back("issue-create-ok.json", {
       before: prepareScope,
     });
@@ -193,7 +193,7 @@ describe("JiraClient creating data", () => {
       before: prepareScope,
     });
 
-    const client = await getAuthenticatedClient();
+    const client = getAuthenticatedClient();
     expect(await client.projectKeyToProjectId("PROJECTNAME")).toEqual(10000);
     nockDone();
   });
@@ -203,7 +203,7 @@ describe("JiraClient creating data", () => {
       before: prepareScope,
     });
 
-    const client = await getAuthenticatedClient();
+    const client = getAuthenticatedClient();
     await expect(
       client.projectKeyToProjectId("PROJECTNAMEBAD"),
     ).rejects.toThrow(`No project could be found with key 'PROJECTNAMEBAD'`);

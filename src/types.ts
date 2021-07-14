@@ -1,10 +1,3 @@
-import {
-  GraphClient,
-  IntegrationExecutionContext,
-  PersisterClient,
-} from "@jupiterone/jupiter-managed-integration-sdk";
-import JiraClient from "./jira/JiraClient";
-
 export interface ProjectConfig {
   key: string;
 }
@@ -15,19 +8,29 @@ export interface CreateIssueActionProperties {
    */
   project: string;
   summary: string;
-  classification: string;
+  classification: IssueTypeName;
   additionalFields?: object;
 }
 
-export interface JiraIntegrationContext extends IntegrationExecutionContext {
-  graph: GraphClient;
-  persister: PersisterClient;
-  jira: JiraClient;
-  projects: ProjectConfig[];
-  customFieldsToInclude: string[];
-  lastJobTimestamp: number | null;
+export type IssueTypeName =
+  | 'Epic'
+  | 'Improvement'
+  | 'Task'
+  | 'Sub-task'
+  | 'New Feature';
+
+export interface JiraParams {
+  host: string;
+  password: string;
+  username: string;
 }
 
-export interface ResourceCacheState {
-  resourceFetchCompleted?: boolean;
+export interface PaginationOptions {
+  startAt?: number;
+  pageSize?: number;
+}
+
+export interface IssuesOptions extends PaginationOptions {
+  project: string;
+  sinceAtTimestamp?: number;
 }

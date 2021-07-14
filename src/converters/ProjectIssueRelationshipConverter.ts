@@ -1,15 +1,15 @@
+import { Relationship } from '@jupiterone/integration-sdk-core';
 import {
   ISSUE_ENTITY_TYPE,
   PROJECT_ENTITY_TYPE,
   PROJECT_ISSUE_RELATIONSHIP_CLASS,
   PROJECT_ISSUE_RELATIONSHIP_TYPE,
-  ProjectIssueRelationship,
-} from "../entities";
-import { Issue, Project } from "../jira";
-import generateEntityKey from "../utils/generateEntityKey";
+} from '../entities';
+import { Issue, Project } from '../jira';
+import generateEntityKey from '../utils/generateEntityKey';
 
 export function createProjectIssueRelationships(issues: Issue[]) {
-  return issues.reduce((acc: ProjectIssueRelationship[], issue) => {
+  return issues.reduce((acc: Relationship[], issue) => {
     return [
       ...acc,
       createProjectIssueRelationship(issue.fields.project, issue),
@@ -17,10 +17,10 @@ export function createProjectIssueRelationships(issues: Issue[]) {
   }, []);
 }
 
-export function createProjectIssueRelationship(
+function createProjectIssueRelationship(
   project: Project,
   issue: Issue,
-): ProjectIssueRelationship {
+): Relationship {
   const projectKey = generateEntityKey(PROJECT_ENTITY_TYPE, project.id);
   const issueKey = generateEntityKey(ISSUE_ENTITY_TYPE, issue.id);
 
